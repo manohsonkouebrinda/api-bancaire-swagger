@@ -6,10 +6,15 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+
+// Redirection racine vers Swagger
+app.get('/', (req, res) => {
+  res.redirect('/api-docs');
+});
 
 // Base de données
 const db = new sqlite3.Database('bank.db');
@@ -55,6 +60,7 @@ const swaggerOptions = {
       description: 'API de gestion bancaire (création compte, dépôt, retrait)'
     },
     servers: [
+      { url: 'https://api-bancaire-swagger.onrender.com', description: 'Serveur Render' },
       { url: 'http://localhost:3000', description: 'Serveur local' }
     ]
   },
@@ -168,7 +174,6 @@ app.get('/api/accounts', (req, res) => {
  *         required: true
  *         schema:
  *           type: string
- *         description: ID du compte
  *     responses:
  *       200:
  *         description: Détails du compte
@@ -214,7 +219,6 @@ app.get('/api/accounts/:id', (req, res) => {
  *                 example: 50000
  *               description:
  *                 type: string
- *                 example: "Dépôt espèces"
  *     responses:
  *       200:
  *         description: Dépôt effectué
@@ -286,7 +290,6 @@ app.post('/api/accounts/:id/deposit', (req, res) => {
  *                 example: 20000
  *               description:
  *                 type: string
- *                 example: "Retrait guichet"
  *     responses:
  *       200:
  *         description: Retrait effectué
