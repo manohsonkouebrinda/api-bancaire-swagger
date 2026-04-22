@@ -58,41 +58,21 @@ const swaggerOptions = {
     info: {
       title: 'Système Bancaire API - Devoir 304',
       version: '1.0.0',
-      description: `API de gestion bancaire avec tests intégrés
+      description: `API de gestion bancaire (création compte, dépôt, retrait, fermeture de compte)
 
-## 📋 CAS DE TEST MANUELS
+**Étudiant :** MANOH SONKOUE Brinda
+**Matricule :** 23V2302
 
-### Test 1 : Création de compte
-- **Requête**: POST /api/accounts
-- **Corps**: {"clientName":"MANOH SONKOUE Brinda","clientEmail":"brinda@email.com","currency":"XAF"}
-- **Résultat attendu**: 201, compte créé avec ID
+**Lien de l'API :** https://api-bancaire-swagger.onrender.com
 
-### Test 2 : Dépôt
-- **Requête**: POST /api/accounts/{id}/deposit
-- **Corps**: {"amount":50000}
-- **Résultat attendu**: 200, solde augmenté
-
-### Test 3 : Retrait
-- **Requête**: POST /api/accounts/{id}/withdraw
-- **Corps**: {"amount":20000}
-- **Résultat attendu**: 200, solde diminué
-
-### Test 4 : Solde insuffisant
-- **Requête**: POST /api/accounts/{id}/withdraw
-- **Corps**: {"amount":100000}
-- **Résultat attendu**: 400, "Solde insuffisant"
-
-### Test 5 : Fermeture de compte
-- **Requête**: DELETE /api/accounts/{id}
-- **Résultat attendu**: 200, "Compte désactivé"
-
-### Test 6 : Liste des comptes
-- **Requête**: GET /api/accounts
-- **Résultat attendu**: 200, tableau des comptes
-
-### Test 7 : Historique des transactions
-- **Requête**: GET /api/accounts/{id}/transactions
-- **Résultat attendu**: 200, tableau des transactions`
+## Fonctionnalités disponibles
+- Création de compte bancaire
+- Liste des comptes
+- Consultation d'un compte
+- Dépôt d'argent
+- Retrait d'argent
+- Historique des transactions
+- Fermeture de compte`
     },
     servers: [
       { url: 'https://api-bancaire-swagger.onrender.com', description: 'Serveur Render' },
