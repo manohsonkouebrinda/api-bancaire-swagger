@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
   res.redirect('/api-docs');
 });
 
-// Base de données
+// ========== BASE DE DONNÉES ==========
 const db = new sqlite3.Database('bank.db');
 
 db.run(`
@@ -27,6 +27,7 @@ db.run(`
     client_email TEXT,
     balance REAL DEFAULT 0,
     currency TEXT DEFAULT 'XAF',
+    status TEXT DEFAULT 'ACTIVE',
     created_at TEXT DEFAULT CURRENT_TIMESTAMP
   )
 `);
@@ -50,14 +51,48 @@ function generateAccountNumber() {
   return `XAF-${random}`;
 }
 
-// Configuration Swagger
+// ========== CONFIGURATION SWAGGER ==========
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
     info: {
       title: 'Système Bancaire API - Devoir 304',
       version: '1.0.0',
-      description: 'API de gestion bancaire (création compte, dépôt, retrait)'
+      description: `API de gestion bancaire avec tests intégrés
+
+## 📋 CAS DE TEST MANUELS
+
+### Test 1 : Création de compte
+- **Requête**: POST /api/accounts
+- **Corps**: {"clientName":"Jean Dupont","clientEmail":"jean@email.com"}
+- **Résultat attendu**: 201, compte créé avec ID
+
+### Test 2 : Dépôt
+- **Requête**: POST /api/accounts/{id}/deposit
+- **Corps**: {"amount":50000}
+- **Résultat attendu**: 200, balanceAfter = 50000
+
+### Test 3 : Retrait
+- **Requête**: POST /api/accounts/{id}/withdraw
+- **Corps**: {"amount":20000}
+- **Résultat attendu**: 200, balanceAfter = 30000
+
+### Test 4 : Solde insuffisant
+- **Requête**: POST /api/accounts/{id}/withdraw
+- **Corps**: {"amount":100000}
+- **Résultat attendu**: 400, "Solde insuffisant"
+
+### Test 5 : Fermeture de compte
+- **Requête**: DELETE /api/accounts/{id}
+- **Résultat attendu**: 200, "Compte désactivé"
+
+### Test 6 : Liste des comptes
+- **Requête**: GET /api/accounts
+- **Résultat attendu**: 200, tableau des comptes
+
+### Test 7 : Historique des transactions
+- **Requête**: GET /api/accounts/{id}/transactions
+- **Résultat attendu**: 200, tableau des transactions`
     },
     servers: [
       { url: 'https://api-bancaire-swagger.onrender.com', description: 'Serveur Render' },
@@ -70,6 +105,7 @@ const swaggerOptions = {
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// ========== 1. SANTÉ ==========
 /**
  * @swagger
  * /api/health:
@@ -85,6 +121,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'API bancaire fonctionne' });
 });
 
+// ========== 2. CRÉER UN COMPTE ==========
 /**
  * @swagger
  * /api/accounts:
@@ -102,18 +139,14 @@ app.get('/api/health', (req, res) => {
  *               - clientName
  *               - clientEmail
  *             properties:
- *               clientName:
- *                 type: string
- *                 example: "Jean Dupont"
- *               clientEmail:
- *                 type: string
- *                 example: "jean@email.com"
- *               currency:
- *                 type: string
- *                 example: "XAF"
+ *               clientName: { type: string, example: "Jean Dupont" }
+ *               clientEmail: { type: string, example: "jean@email.com" }
+ *               currency: { type: string, example: "XAF" }
  *     responses:
  *       201:
  *         description: Compte créé avec succès
+ *       400:
+ *         description: Données manquantes
  */
 app.post('/api/accounts', (req, res) => {
   const { clientName, clientEmail, currency = 'XAF' } = req.body;
@@ -141,6 +174,7 @@ app.post('/api/accounts', (req, res) => {
   );
 });
 
+// ========== 3. LISTER LES COMPTES ==========
 /**
  * @swagger
  * /api/accounts:
@@ -161,6 +195,7 @@ app.get('/api/accounts', (req, res) => {
   });
 });
 
+// ========== 4. CONSULTER UN COMPTE ==========
 /**
  * @swagger
  * /api/accounts/{id}:
@@ -172,8 +207,7 @@ app.get('/api/accounts', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     responses:
  *       200:
  *         description: Détails du compte
@@ -192,6 +226,7 @@ app.get('/api/accounts/:id', (req, res) => {
   });
 });
 
+// ========== 5. DÉPÔT ==========
 /**
  * @swagger
  * /api/accounts/{id}/deposit:
@@ -203,25 +238,22 @@ app.get('/api/accounts/:id', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - amount
+ *             required: [amount]
  *             properties:
- *               amount:
- *                 type: number
- *                 example: 50000
- *               description:
- *                 type: string
+ *               amount: { type: number, example: 50000 }
+ *               description: { type: string, example: "Dépôt espèces" }
  *     responses:
  *       200:
  *         description: Dépôt effectué
+ *       400:
+ *         description: Montant invalide
  *       404:
  *         description: Compte non trouvé
  */
@@ -263,6 +295,7 @@ app.post('/api/accounts/:id/deposit', (req, res) => {
   });
 });
 
+// ========== 6. RETRAIT ==========
 /**
  * @swagger
  * /api/accounts/{id}/withdraw:
@@ -274,27 +307,22 @@ app.post('/api/accounts/:id/deposit', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - amount
+ *             required: [amount]
  *             properties:
- *               amount:
- *                 type: number
- *                 example: 20000
- *               description:
- *                 type: string
+ *               amount: { type: number, example: 20000 }
+ *               description: { type: string, example: "Retrait guichet" }
  *     responses:
  *       200:
  *         description: Retrait effectué
  *       400:
- *         description: Solde insuffisant
+ *         description: Montant invalide ou solde insuffisant
  *       404:
  *         description: Compte non trouvé
  */
@@ -346,6 +374,7 @@ app.post('/api/accounts/:id/withdraw', (req, res) => {
   });
 });
 
+// ========== 7. HISTORIQUE ==========
 /**
  * @swagger
  * /api/accounts/{id}/transactions:
@@ -357,11 +386,12 @@ app.post('/api/accounts/:id/withdraw', (req, res) => {
  *       - in: path
  *         name: id
  *         required: true
- *         schema:
- *           type: string
+ *         schema: { type: string }
  *     responses:
  *       200:
  *         description: Liste des transactions
+ *       404:
+ *         description: Compte non trouvé
  */
 app.get('/api/accounts/:id/transactions', (req, res) => {
   db.all(
@@ -376,6 +406,39 @@ app.get('/api/accounts/:id/transactions', (req, res) => {
   );
 });
 
+// ========== 8. FERMETURE DE COMPTE (NOUVEAU) ==========
+/**
+ * @swagger
+ * /api/accounts/{id}:
+ *   delete:
+ *     summary: Fermer/désactiver un compte
+ *     tags:
+ *       - Comptes
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Compte désactivé avec succès
+ *       404:
+ *         description: Compte non trouvé
+ */
+app.delete('/api/accounts/:id', (req, res) => {
+  const accountId = req.params.id;
+  
+  db.get('SELECT * FROM accounts WHERE id = ?', [accountId], (err, account) => {
+    if (err || !account) {
+      return res.status(404).json({ success: false, error: 'Compte non trouvé' });
+    }
+    
+    db.run('UPDATE accounts SET status = "INACTIVE" WHERE id = ?', [accountId]);
+    res.json({ success: true, message: 'Compte désactivé avec succès' });
+  });
+});
+
+// ========== DÉMARRAGE ==========
 app.listen(PORT, () => {
   console.log(`🚀 Serveur sur http://localhost:${PORT}`);
   console.log(`📝 Swagger: http://localhost:${PORT}/api-docs`);
