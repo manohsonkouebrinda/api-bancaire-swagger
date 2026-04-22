@@ -64,18 +64,18 @@ const swaggerOptions = {
 
 ### Test 1 : Création de compte
 - **Requête**: POST /api/accounts
-- **Corps**: {"clientName":"Jean Dupont","clientEmail":"jean@email.com"}
+- **Corps**: {"clientName":"MANOH SONKOUE Brinda","clientEmail":"brinda@email.com","currency":"XAF"}
 - **Résultat attendu**: 201, compte créé avec ID
 
 ### Test 2 : Dépôt
 - **Requête**: POST /api/accounts/{id}/deposit
-- **Corps**: {"amount":100000}
-- **Résultat attendu**: 200, balanceAfter = 50000
+- **Corps**: {"amount":50000}
+- **Résultat attendu**: 200, solde augmenté
 
 ### Test 3 : Retrait
 - **Requête**: POST /api/accounts/{id}/withdraw
-- **Corps**: {"amount":30000}
-- **Résultat attendu**: 200, balanceAfter = 30000
+- **Corps**: {"amount":20000}
+- **Résultat attendu**: 200, solde diminué
 
 ### Test 4 : Solde insuffisant
 - **Requête**: POST /api/accounts/{id}/withdraw
@@ -139,7 +139,7 @@ app.get('/api/health', (req, res) => {
  *               - clientName
  *               - clientEmail
  *             properties:
- *               clientName: { type: string, example: "brinda Manoh" }
+ *               clientName: { type: string, example: "MANOH SONKOUE Brinda" }
  *               clientEmail: { type: string, example: "brinda@email.com" }
  *               currency: { type: string, example: "XAF" }
  *     responses:
@@ -406,7 +406,7 @@ app.get('/api/accounts/:id/transactions', (req, res) => {
   );
 });
 
-// ========== 8. FERMETURE DE COMPTE (NOUVEAU) ==========
+// ========== 8. FERMETURE DE COMPTE ==========
 /**
  * @swagger
  * /api/accounts/{id}:
