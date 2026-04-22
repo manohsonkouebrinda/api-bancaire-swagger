@@ -139,8 +139,8 @@ app.get('/api/health', (req, res) => {
  *               - clientName
  *               - clientEmail
  *             properties:
- *               clientName: { type: string, example: "Jean Dupont" }
- *               clientEmail: { type: string, example: "jean@email.com" }
+ *               clientName: { type: string, example: "brinda Manoh" }
+ *               clientEmail: { type: string, example: "brinda@email.com" }
  *               currency: { type: string, example: "XAF" }
  *     responses:
  *       201:
