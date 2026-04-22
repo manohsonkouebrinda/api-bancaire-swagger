@@ -69,12 +69,12 @@ const swaggerOptions = {
 
 ### Test 2 : Dépôt
 - **Requête**: POST /api/accounts/{id}/deposit
-- **Corps**: {"amount":50000}
+- **Corps**: {"amount":100000}
 - **Résultat attendu**: 200, balanceAfter = 50000
 
 ### Test 3 : Retrait
 - **Requête**: POST /api/accounts/{id}/withdraw
-- **Corps**: {"amount":20000}
+- **Corps**: {"amount":30000}
 - **Résultat attendu**: 200, balanceAfter = 30000
 
 ### Test 4 : Solde insuffisant
